@@ -9,6 +9,8 @@ import org.apache.thrift.transport.TNonblockingServerSocket
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
+// Server configuration. Should be moved to a file based on the environment,
+// but here only for demo simplicity
 val serverVersion = "1.0"
 val thriftServerPort = 26000 // Use ports above 25000 to avoid rejections by Apple AppReview Team 😄
 val thriftServerListenOn = "0.0.0.0" // Set "::" to start the server with IPv6 stack (not needed if you're on AWS)
