@@ -1,0 +1,80 @@
+group 'net.gotev'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.1.51'
+    ext.shadow_version = '2.0.1'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+        classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_version"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'kotlin'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.github.ben-manes.versions'
+
+configurations {
+    javaAgent
+}
+
+// Naming and packaging settings for the "shadow jar".
+shadowJar {
+    baseName = 'app'
+    classifier = 'fat'
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/generated'
+}
+
+sourceCompatibility = 1.8
+
+mainClassName = 'net.gotev.todolist.MainKt'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testCompile "junit:junit:4.12"
+
+    // Kotlin
+    compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+
+    // Logging
+    compile 'io.github.microutils:kotlin-logging:1.4.6'
+    compile 'org.slf4j:slf4j-log4j12:1.7.25'
+
+    compile 'org.apache.thrift:libthrift:0.10.0'
+
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+/*
+task generateThrift(type: Exec) {
+    commandLine './generate-thrift', 'thrift', 'src/main/generated'
+}
+
+compileKotlin.dependsOn generateThrift
+*/
