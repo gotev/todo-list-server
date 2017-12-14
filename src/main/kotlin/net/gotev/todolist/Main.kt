@@ -2,6 +2,7 @@ package net.gotev.todolist
 
 import mu.KLogger
 import mu.KotlinLogging
+import net.gotev.todolist.server.ToDoList
 import org.apache.thrift.protocol.TCompactProtocol
 import org.apache.thrift.server.THsHaServer
 import org.apache.thrift.transport.TFramedTransport
@@ -27,6 +28,7 @@ fun main(args: Array<String>) {
 
 fun startThriftServer(log: KLogger) {
     val transport = TNonblockingServerSocket(InetSocketAddress(thriftServerListenOn, thriftServerPort))
+    val processor = ToDoList.AsyncProcessor<ToDoList.AsyncIface>(ToDoListRPCService())
     val framedTransportMaxLength = 16384000L //16MB
 
     val hsHaConfig = THsHaServer.Args(transport)

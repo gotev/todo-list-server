@@ -1,0 +1,50 @@
+#!/bin/bash -e
+
+if [ "x$1" == "x" ]; then
+    echo "you must specify source directory"
+    exit 1
+fi
+
+if [ "x$2" == "x" ]; then
+    echo "you must specify output directory"
+    exit 2
+fi
+
+echo "Pulling latest thrift definitions..."
+git submodule update --recursive --remote
+
+IN_DIR=$1
+OUT_DIR=$2
+
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+if [ "x$3" == "xclean" ]; then
+    echo "Clean up generated directory $OUT_DIR ..."
+    rm -rf "$OUT_DIR"
+fi
+
+mkdir -p "$OUT_DIR"
+
+IN_DIR_ABSOLUTE=$(realpath "$IN_DIR")
+OUT_DIR_ABSOLUTE=$(realpath "$OUT_DIR")
+
+echo "source: $IN_DIR_ABSOLUTE"
+echo "output: $OUT_DIR_ABSOLUTE"
+
+if [ "x$THRIFT_BUILD_ENVIRONMENT" == "x" ]; then
+    echo "Pulling latest thrift docker image..."
+    docker pull thrift
+fi
+
+for idlFile in "$IN_DIR"/*.thrift
+do
+    echo "Processing $idlFile"
+    if [ "x$THRIFT_BUILD_ENVIRONMENT" == "xCI" ]; then
+        thrift -I "$IN_DIR_ABSOLUTE" -v -r -strict -out "$OUT_DIR_ABSOLUTE" --gen java "$idlFile"
+    else
+        docker run -v "$IN_DIR_ABSOLUTE:/$IN_DIR" -v "$OUT_DIR_ABSOLUTE:/generated" thrift thrift -I "/$IN_DIR" -v -r -strict -out /generated --gen java "$idlFile"
+    fi
+done
+
